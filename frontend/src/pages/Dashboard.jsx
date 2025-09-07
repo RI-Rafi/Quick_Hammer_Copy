@@ -4,8 +4,7 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import '../auction-styles.css';
-
-const API_URL = 'http://localhost:5000/api';
+import { API_URL } from '../utils/config';
 
 const Dashboard = () => {
   const { token, user } = useSelector((s) => s.auth);
@@ -56,7 +55,7 @@ const Dashboard = () => {
     } else if (user?.role === 'bidder') {
       const loadBidderData = async () => {
         try {
-          const res = await axios.get(`${API_URL}/bids/user/${user.id}`, {
+          const res = await axios.get(`${API_URL}/bids/me`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           setUserBids(res.data.bids || []);

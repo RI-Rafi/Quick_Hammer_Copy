@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_URL, MEDIA_URL } from '../utils/config';
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 
-const API_URL = 'http://localhost:5000/api';
+// API_URL comes from config
 
 const EditAuction = () => {
   const { id } = useParams();
@@ -268,7 +269,7 @@ const EditAuction = () => {
             <div className="existing-images">
               {formData.existingImages.map((img, idx) => (
                 <div key={idx} className="image-preview">
-                  <img src={img.startsWith('http') ? img : `http://localhost:5000${img}`} alt={`Current ${idx + 1}`} />
+                  <img src={img.startsWith('http') ? img : `${MEDIA_URL}${img}`} alt={`Current ${idx + 1}`} />
                   <button type="button" onClick={() => removeExistingImage(idx)} className="remove-image">×</button>
                 </div>
               ))}

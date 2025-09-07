@@ -14,7 +14,7 @@ const path = require('path');
 const fs = require('fs');
 const cron = require('node-cron');
 const { updateAuctionStatuses } = require('./services/auctionService');
-
+//69
 // Load environment variables
 dotenv.config();
 
@@ -27,11 +27,18 @@ const io = socketIo(server, {
   }
 });
 
+// Expose io to the rest of the app (controllers/services)
+app.set('io', io);
+
 // Create uploads directory if it doesn't exist
 const uploadDir = path.join(__dirname, 'public', 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
+
+// Stripe webhook must receive raw body before JSON/body parsers
+const { handleWebhook } = require('./controllers/paymentController');
+app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), handleWebhook);
 
 // Middleware
 app.use(helmet());
@@ -135,6 +142,30 @@ cron.schedule('* * * * *', async () => {
 
 // Run initial status update on server start
 updateAuctionStatuses();
+
+// Socket.IO handlers
+io.on('connection', (socket) => {
+  // Join specific auction room
+  socket.on('join-auction', (auctionId) => {
+    if (auctionId) {
+      socket.join(`auction-${auctionId}`);
+    }
+  });
+
+  // Leave auction room
+  socket.on('leave-auction', (auctionId) => {
+    if (auctionId) {
+      socket.leave(`auction-${auctionId}`);
+    }
+  });
+
+  // Optional: user room for notifications
+  socket.on('join-user', (userId) => {
+    if (userId) {
+      socket.join(`user-${userId}`);
+    }
+  });
+});
 
 const PORT = process.env.PORT || 5000;
 

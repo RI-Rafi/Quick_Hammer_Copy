@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { API_URL } from '../utils/config';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = 'http://localhost:5000/api';
+// API_URL comes from config
 
 const CreateAuction = () => {
   const { token, user } = useSelector((s) => s.auth);

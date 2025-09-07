@@ -7,8 +7,7 @@ import socketService from '../utils/socket';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import '../auction-styles.css';
-
-const API_URL = 'http://localhost:5000/api';
+import { API_URL, MEDIA_URL } from '../utils/config';
 
 const CheckoutForm = ({ auctionId, onClose }) => {
   const stripe = useStripe();
@@ -153,7 +152,7 @@ const AuctionDetail = () => {
           {currentAuction.images.map((img, idx) => (
             <img
               key={idx}
-              src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+              src={img.startsWith('http') ? img : `${MEDIA_URL}${img}`}
               alt={`Auction image ${idx + 1}`}
               className="auction-image"
               onError={(e) => {

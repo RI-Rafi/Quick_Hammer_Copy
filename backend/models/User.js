@@ -46,13 +46,18 @@ const userSchema = new mongoose.Schema({
     match: [/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number']
   },
   address: {
-    street: String,
-    city: String,
-    state: String,
-    zipCode: String,
-    country: String
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
   },
   profileImage: {
+    type: String,
+    default: ''
+  },
+  bio: {
+    type: String,
+    default: ''
+  },
+  signature: {
     type: String,
     default: ''
   },

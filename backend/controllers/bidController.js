@@ -27,11 +27,13 @@ const placeBid = async (req, res, next) => {
 
     // Emit socket events
     const io = req.app.get('io');
-    io.to(`auction-${auctionId}`).emit('bid-updated', {
-      auctionId,
-      currentPrice: bid.amount,
-      totalBidsIncrement: 1
-    });
+    if (io) {
+      io.to(`auction-${auctionId}`).emit('bid-updated', {
+        auctionId,
+        currentPrice: bid.amount,
+        totalBidsIncrement: 1
+      });
+    }
 
     // Optionally notify via service (defer to service layer if wired)
     try {

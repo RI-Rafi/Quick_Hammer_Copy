@@ -1,4 +1,11 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || '');
+let stripe = null;
+try {
+  if (process.env.STRIPE_SECRET_KEY) {
+    stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+  }
+} catch (e) {
+  stripe = null;
+}
 const Payment = require('../models/Payment');
 const Auction = require('../models/Auction');
 
@@ -7,6 +14,9 @@ const Auction = require('../models/Auction');
 // @access  Private (winner/admin)
 const createPaymentIntent = async (req, res, next) => {
   try {
+    if (!stripe) {
+      return res.status(500).json({ success: false, message: 'Payments are not configured. Please set STRIPE_SECRET_KEY.' });
+    }
     const { auctionId } = req.body;
 
     const auction = await Auction.findById(auctionId);
@@ -18,7 +28,9 @@ const createPaymentIntent = async (req, res, next) => {
       return res.status(403).json({ success: false, message: 'Only the winning bidder can pay' });
     }
 
-    const amountUsd = Math.round((auction.winningBid + (auction.shipping?.cost || 0)) * 100);
+    const baseAmount = auction.winningBid || auction.currentPrice || 0;
+    const shippingCost = (auction.shipping && auction.shipping.cost) ? auction.shipping.cost : 0;
+    const amountUsd = Math.round((baseAmount + shippingCost) * 100);
 
     const intent = await stripe.paymentIntents.create({
       amount: amountUsd,
@@ -47,6 +59,10 @@ const createPaymentIntent = async (req, res, next) => {
 // @access  Public (Stripe)
 const handleWebhook = async (req, res) => {
   try {
+    if (!stripe) {
+      // If Stripe not configured, acknowledge to avoid retries in dev
+      return res.json({ received: true, disabled: true });
+    }
     const sig = req.headers['stripe-signature'];
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
     let event;

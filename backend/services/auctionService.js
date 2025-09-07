@@ -37,6 +37,7 @@ const updateAuctionStatuses = async () => {
       if (highestBid) {
         auction.winner = highestBid.bidder._id;
         auction.currentPrice = highestBid.amount;
+        auction.winningBid = highestBid.amount;
       }
 
       await auction.save();
